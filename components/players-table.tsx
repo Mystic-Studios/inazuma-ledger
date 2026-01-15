@@ -57,8 +57,10 @@ export function PlayersTable({ players }: PlayersTableProps) {
               <TableHead className="text-right text-blue-400 font-bold">KICK</TableHead>
               <TableHead className="text-right text-blue-400 font-bold">CTRL</TableHead>
               <TableHead className="text-right text-blue-400 font-bold">TECH</TableHead>
+              <TableHead className="text-right text-blue-400 font-bold">PRES</TableHead>
               <TableHead className="text-right text-blue-400 font-bold">PHYS</TableHead>
               <TableHead className="text-right text-blue-400 font-bold">AGIL</TableHead>
+              <TableHead className="text-right text-blue-400 font-bold">INTL</TableHead>
               <TableHead className="text-right text-amber-500 font-bold">TOTAL</TableHead>
             </TableRow>
           </TableHeader>
@@ -109,8 +111,10 @@ export function PlayersTable({ players }: PlayersTableProps) {
                 <TableCell className="text-right font-mono text-slate-300">{player.stats_base.kick}</TableCell>
                 <TableCell className="text-right font-mono text-slate-300">{player.stats_base.control}</TableCell>
                 <TableCell className="text-right font-mono text-slate-300">{player.stats_base.technique}</TableCell>
+                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.pressure}</TableCell>
                 <TableCell className="text-right font-mono text-slate-300">{player.stats_base.physical}</TableCell>
                 <TableCell className="text-right font-mono text-slate-300">{player.stats_base.agility}</TableCell>
+                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.intelligence}</TableCell>
                 <TableCell className="text-right font-mono font-bold text-amber-400">{player.stats_base.total_stats}</TableCell>
               </TableRow>
             ))}
