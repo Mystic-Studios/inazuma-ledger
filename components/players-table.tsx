@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Image from "next/image";
 import { Player } from "@/types";
 import {
   Table,
@@ -20,22 +21,22 @@ interface PlayersTableProps {
   players: Player[];
 }
 
-const getElementColor = (element: string) => {
+const getElementImage = (element: string) => {
   switch (element?.toLowerCase()) {
-    case 'fire': return 'text-red-500 bg-red-500/10 border-red-500/20';
-    case 'wind': return 'text-green-500 bg-green-500/10 border-green-500/20';
-    case 'wood': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-    case 'earth': return 'text-yellow-600 bg-yellow-600/10 border-yellow-600/20';
-    default: return 'text-slate-500 bg-slate-500/10';
+    case 'fire': return '/elements/fire.png';
+    case 'wind': return '/elements/wind.png';
+    case 'forest': return '/elements/forest.png';
+    case 'mountain': return '/elements/mountain.png';
+    default: return '/elements/void.png';
   }
 };
 
 const getPositionColor = (position: string) => {
   switch (position?.toUpperCase()) {
-    case 'GK': return 'text-yellow-500';
+    case 'GK': return 'text-white-500';
     case 'FW': return 'text-red-500';
-    case 'MF': return 'text-blue-500';
-    case 'DF': return 'text-green-500';
+    case 'MF': return 'text-orange-500';
+    case 'DF': return 'text-blue-500';
     default: return 'text-gray-400';
   }
 };
@@ -103,9 +104,15 @@ export function PlayersTable({ players }: PlayersTableProps) {
                 </TableCell>
 
                 <TableCell>
-                  <Badge variant="outline" className={`${getElementColor(player.element)} border-0`}>
-                      {player.element}
-                  </Badge>
+                  <div className="flex items-center" title={player.element}>
+                    <Image 
+                      src={getElementImage(player.element)} 
+                      alt={player.element}
+                      width={24} 
+                      height={24} 
+                      className="opacity-90"
+                    />
+                  </div>
                 </TableCell>
 
                 <TableCell className="text-right font-mono text-slate-300">{player.stats_base.kick}</TableCell>
