@@ -20,6 +20,16 @@ const SHEET_GID = '1173802089';
 interface CsvRow {
   [key: string]: string | undefined;
 }
+
+const cleanText = (val: string | undefined) => {
+  if (!val) return 'Unknown';
+  
+  const match = val.match(/\(([^)]+)\)/);
+  if (match) return match[1].trim();
+  
+  return val.trim();
+};
+
 async function importPlayers() {
 
   const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
@@ -48,14 +58,15 @@ async function importPlayers() {
       };
 
       return {
-        id: row['ID'],
+        id: Number(row['ID']),
         name_en: row['Name(Localised)'],
         name_jp: row['Name(Romaji)'],
         gender: row['Gender'],
-        role: row['Role'],
+
+        role: cleanText(row['Role']),
         position: row['Position'],
         alt_position: row['Alt Position'],
-        element: row['Element'],
+        element: cleanText(row['Element']),
         playstyle: row['Preferred Playstyle'],
         
         stats_base: {

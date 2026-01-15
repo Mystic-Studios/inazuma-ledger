@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Player } from "@/types";
 import { SearchControls } from "@/components/ui/search-controls";
 import { PlayersTable } from "@/components/players-table";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +12,9 @@ export default async function PlayersPage(props: {
   const searchParams = await props.searchParams;
 
   const query = (searchParams?.query as string) || '';
-  const role = (searchParams?.role as string) || '';
+  const position = (searchParams?.position as string) || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const ITEMS_PER_PAGE = 50;
+  const ITEMS_PER_PAGE = 50; 
 
   const from = (currentPage - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
@@ -22,16 +23,11 @@ export default async function PlayersPage(props: {
     .from('players')
     .select('*', { count: 'exact' });
 
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike('name_en', `%${query}%`);
-  }
-  
-  if (role) {
-    supabaseQuery = supabaseQuery.ilike('role', `%${role}%`); 
-  }
+  if (query) supabaseQuery = supabaseQuery.ilike('name_en', `%${query}%`);
+  if (position) supabaseQuery = supabaseQuery.ilike('position', `%${position}%`);
 
   const { data: players, count, error } = await supabaseQuery
-    .order('id', { ascending: true })
+    .order('id', { ascending: true }) 
     .range(from, to);
 
   if (error) {
@@ -52,10 +48,13 @@ export default async function PlayersPage(props: {
 
         <PlayersTable players={players as Player[]} />
 
-        <div className="flex justify-between items-center mt-6 text-sm text-slate-500">
-             <div>Showing {players?.length} players</div>
-             <div className="flex gap-2"></div>
-        </div>
+        {count && (
+          <PaginationControls 
+            totalCount={count} 
+            currentPage={currentPage} 
+            pageSize={ITEMS_PER_PAGE} 
+          />
+        )}
       </div>
     </main>
   );

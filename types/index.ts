@@ -10,7 +10,7 @@ export interface PlayerStats {
 }
 
 export interface Player {
-  id: string;
+  id: number;
   name_en: string;
   name_jp: string | null;
   gender: string | null;
