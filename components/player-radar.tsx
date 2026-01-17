@@ -88,13 +88,13 @@ function CustomTick({ payload, x, y, cx, cy, statValues }: CustomTickProps) {
 
 export function PlayerRadar({ player }: { player: Player }) {
   const data = [
-    { subject: "Agility", A: player.stats_base.agility, fullMark: 111 },
-    { subject: "Intelligence", A: player.stats_base.intelligence, fullMark: 121 },
-    { subject: "Technique", A: player.stats_base.technique, fullMark: 116 },
-    { subject: "Kick", A: player.stats_base.kick, fullMark: 121 },
-    { subject: "Control", A: player.stats_base.control, fullMark: 115 },
-    { subject: "Pressure", A: player.stats_base.pressure, fullMark: 105 },
-    { subject: "Physical", A: player.stats_base.physical, fullMark: 109 },
+    { subject: "Agility", A: player.stats_base.agility, fullMark: 150 },
+    { subject: "Intelligence", A: player.stats_base.intelligence, fullMark: 158 },
+    { subject: "Technique", A: player.stats_base.technique, fullMark: 160 },
+    { subject: "Kick", A: player.stats_base.kick, fullMark: 168 },
+    { subject: "Control", A: player.stats_base.control, fullMark: 160 },
+    { subject: "Pressure", A: player.stats_base.pressure, fullMark: 141 },
+    { subject: "Physical", A: player.stats_base.physical, fullMark: 146 },
   ];
 
   const statValues = {
