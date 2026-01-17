@@ -1,8 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import { Progress } from "@/components/ui/progress"; 
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { LoginButton } from "@/components/login-button"; 
+import { LockKeyhole } from "lucide-react";
 
 // Define the shape of the data returning from the join query
 interface CollectionItem {
@@ -13,7 +14,7 @@ interface CollectionItem {
     rarity: string;
     element: string;
     image_url: string | null;
-  } | null; // Join might return null if something is wrong, though unlikely with FKs
+  } | null;
 }
 
 const getPercentage = (count: number, total: number) => {
@@ -26,12 +27,32 @@ export default async function CollectionPage() {
 
   // 1. Auth Check
   const { data: { user } } = await supabase.auth.getUser();
+
+  // --- GUEST VIEW (Not Logged In) ---
   if (!user) {
-    redirect("/"); 
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="text-center space-y-6 max-w-md border border-slate-800 bg-slate-900/50 p-10 rounded-2xl">
+          <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-400">
+            <LockKeyhole className="h-8 w-8" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black text-white tracking-tight uppercase">
+              Login Required
+            </h1>
+            <p className="text-slate-400">
+              Join the Inazuma Ledger to track your collection, build your dream team, and compare stats.
+            </p>
+          </div>
+          <LoginButton />
+        </div>
+      </div>
+    );
   }
 
+  // --- LOGGED IN VIEW ---
+
   // 2. Fetch User's Collection
-  // We explicitly type the response to avoid "any" errors
   const { data } = await supabase
     .from('user_collections')
     .select(`
@@ -46,7 +67,6 @@ export default async function CollectionPage() {
     `)
     .eq('user_id', user.id);
 
-  // Cast the data to our interface
   const userItems = (data as unknown as CollectionItem[]) || [];
 
   // 3. Fetch Total Counts
@@ -54,7 +74,7 @@ export default async function CollectionPage() {
   const { count: totalHero } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Hero');
   const { count: totalFabled } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Fabled');
 
-  // 4. Calculate User Stats (Now using proper types)
+  // 4. Calculate User Stats
   const collectedNormal = userItems.filter(i => i.players?.rarity === 'Normal').length;
   const collectedHero = userItems.filter(i => i.players?.rarity === 'Hero').length;
   const collectedFabled = userItems.filter(i => i.players?.rarity === 'Fabled').length;

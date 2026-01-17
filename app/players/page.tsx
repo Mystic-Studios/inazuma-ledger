@@ -73,6 +73,7 @@ export default async function PlayersPage(props: {
         <PlayersTable 
             players={players as Player[]} 
             initialCollection={collectedIds} 
+            isLoggedIn={!!user}
         />
 
         {count && (

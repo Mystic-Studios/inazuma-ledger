@@ -22,6 +22,7 @@ import { toast } from "sonner";
 interface PlayersTableProps {
   players: Player[];
   initialCollection?: number[];
+  isLoggedIn: boolean;
 }
 
 const getElementImage = (element: string) => {
@@ -43,13 +44,17 @@ const getPositionColor = (position: string) => {
     default: return 'text-gray-400';
   }
 };
-export function PlayersTable({ players, initialCollection }: PlayersTableProps) {
+export function PlayersTable({ players, initialCollection, isLoggedIn }: PlayersTableProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  
   const [collectedIds, setCollectedIds] = useState<Set<number>>(new Set(initialCollection));
 
   const handleToggle = async (player: Player, e: React.MouseEvent) => {
     e.stopPropagation();
+
+    if (!isLoggedIn) {
+        toast.error("You must be logged in to collect players");
+        return;
+    }
 
     const isCollected = collectedIds.has(player.id);
     const newSet = new Set(collectedIds);
