@@ -32,13 +32,16 @@ const cleanText = (val: unknown) => {
 
 const extractUrl = (cell: XLSX.CellObject | undefined) => {
   if (!cell) return null;
+  
   if (cell.f) {
-    const match = cell.f.match(/"([^"]+)"/);
-    return match ? match[1] : null;
+    const match = cell.f.match(/"(https?:\/\/[^"]+)"/);
+    if (match) return match[1];
   }
+  
   if (cell.v && String(cell.v).startsWith('http')) {
     return String(cell.v);
   }
+
   return null;
 };
 
@@ -103,12 +106,10 @@ async function importPlayers() {
         if (!row || row.length === 0) continue;
 
         const getRaw = (idx: number) => (idx !== -1 ? row[idx] : undefined);
-        
         const getString = (idx: number) => {
             const val = getRaw(idx);
             return typeof val === 'string' ? val : undefined;
         };
-
         const getNum = (idx: number) => {
           const val = getRaw(idx);
           if (typeof val === 'number') return val;
@@ -117,7 +118,7 @@ async function importPlayers() {
         };
 
         const rawNameEn = getString(colIdx.nameEn) || getString(colIdx.nameJp);
-        if (!rawNameEn || rawNameEn === 'Unknown') {
+        if (!rawNameEn || rawNameEn.trim() === '' || rawNameEn === 'Unknown') {
             continue;
         }
         
@@ -131,8 +132,12 @@ async function importPlayers() {
         }
 
         if (imageUrl) {
-            imageMap.set(cleanName, imageUrl);
-        } else if (imageMap.has(cleanName)) {
+            if (!imageMap.has(cleanName)) {
+                imageMap.set(cleanName, imageUrl);
+            }
+        } 
+
+        else if (imageMap.has(cleanName)) {
             imageUrl = imageMap.get(cleanName);
         }
 
