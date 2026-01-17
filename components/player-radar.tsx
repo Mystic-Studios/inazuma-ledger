@@ -108,7 +108,7 @@ export function PlayerRadar({ player }: { player: Player }) {
   };
 
   return (
-    <div className="h-[450px] w-full mt-4 select-none" pointer-events="none">
+    <div className="h-112.5 w-full mt-4 select-none pointer-events-none">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="55%" data={data}>
           <PolarGrid stroke="#1e293b" strokeWidth={1} />
