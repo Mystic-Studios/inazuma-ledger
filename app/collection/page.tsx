@@ -16,9 +16,9 @@ interface CollectionItem {
   } | null;
 }
 
-const getPercentage = (count: number, total: number) => {
+const getPercentageValue = (count: number, total: number) => {
   if (total === 0) return 0;
-  return Math.round((count / total) * 100);
+  return (count / total) * 100;
 };
 
 export default async function CollectionPage() {
@@ -38,7 +38,7 @@ export default async function CollectionPage() {
               Login Required
             </h1>
             <p className="text-slate-400">
-              Join the Inazuma Ledger to track your collection, build your dream team, and compare stats.
+              Join Inazuma Ledger to track your collection.
             </p>
           </div>
           <LoginButton />
@@ -71,6 +71,11 @@ export default async function CollectionPage() {
   const collectedHero = userItems.filter(i => i.players?.rarity === 'Hero').length;
   const collectedFabled = userItems.filter(i => i.players?.rarity === 'Fabled').length;
 
+  const pctNormal = getPercentageValue(collectedNormal, totalNormal || 1);
+  const pctHero = getPercentageValue(collectedHero, totalHero || 1);
+  const pctFabled = getPercentageValue(collectedFabled, totalFabled || 1);
+
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200">
       <div className="container mx-auto py-10 space-y-8">
@@ -85,34 +90,34 @@ export default async function CollectionPage() {
             <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-blue-400">Normal Players</h3>
-                <span className="text-2xl font-black text-white">{getPercentage(collectedNormal, totalNormal || 1)}%</span>
+                <span className="text-2xl font-black text-white">{pctNormal.toFixed(1)}%</span>
             </div>
-            <Progress value={getPercentage(collectedNormal, totalNormal || 1)} className="h-2 bg-slate-800" />
+            <Progress value={pctNormal} className="h-2 bg-slate-800" />
             <p className="mt-2 text-xs text-slate-500 text-right">{collectedNormal} / {totalNormal}</p>
             </div>
 
             <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-amber-400">Heroes</h3>
-                <span className="text-2xl font-black text-white">{getPercentage(collectedHero, totalHero || 1)}%</span>
+                <span className="text-2xl font-black text-white">{pctHero.toFixed(1)}%</span>
             </div>
-            <Progress value={getPercentage(collectedHero, totalHero || 1)} className="h-2 bg-slate-800" indicatorClassName="bg-amber-400" />
+            <Progress value={pctHero} className="h-2 bg-slate-800" indicatorClassName="bg-amber-400" />
             <p className="mt-2 text-xs text-slate-500 text-right">{collectedHero} / {totalHero}</p>
             </div>
 
             <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-purple-400">Fabled</h3>
-                <span className="text-2xl font-black text-white">{getPercentage(collectedFabled, totalFabled || 1)}%</span>
+                <span className="text-2xl font-black text-white">{pctFabled.toFixed(1)}%</span>
             </div>
-            <Progress value={getPercentage(collectedFabled, totalFabled || 1)} className="h-2 bg-slate-800" indicatorClassName="bg-purple-400" />
+            <Progress value={pctFabled} className="h-2 bg-slate-800" indicatorClassName="bg-purple-400" />
             <p className="mt-2 text-xs text-slate-500 text-right">{collectedFabled} / {totalFabled}</p>
             </div>
         </div>
 
         <div className="border border-slate-800 rounded-xl p-6 bg-slate-950">
             <h2 className="text-xl font-bold text-white mb-6">Collected Items ({userItems.length})</h2>
-            <ScrollArea className="h-[500px]">
+            <ScrollArea className="h-125">
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pr-4">
                 {userItems.map((item) => (
                     item.players && (
