@@ -108,7 +108,7 @@ export function Navbar() {
             </div>
         </nav>
 
-        <div className="flex-none flex items-center gap-2 min-w-[100px] justify-end">
+        <div className="flex-none flex items-center gap-2 min-w-25 justify-end">
           {loading ? (
              <div className="h-9 w-20 bg-slate-800/50 rounded-full animate-pulse" />
           ) : user ? (

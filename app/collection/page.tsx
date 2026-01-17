@@ -5,7 +5,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { LoginButton } from "@/components/login-button"; 
 import { LockKeyhole } from "lucide-react";
 
-// Define the shape of the data returning from the join query
 interface CollectionItem {
   player_id: number;
   players: {
@@ -25,10 +24,8 @@ const getPercentage = (count: number, total: number) => {
 export default async function CollectionPage() {
   const supabase = await createClient();
 
-  // 1. Auth Check
   const { data: { user } } = await supabase.auth.getUser();
 
-  // --- GUEST VIEW (Not Logged In) ---
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
@@ -50,9 +47,6 @@ export default async function CollectionPage() {
     );
   }
 
-  // --- LOGGED IN VIEW ---
-
-  // 2. Fetch User's Collection
   const { data } = await supabase
     .from('user_collections')
     .select(`
@@ -69,12 +63,10 @@ export default async function CollectionPage() {
 
   const userItems = (data as unknown as CollectionItem[]) || [];
 
-  // 3. Fetch Total Counts
   const { count: totalNormal } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Normal');
   const { count: totalHero } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Hero');
   const { count: totalFabled } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Fabled');
 
-  // 4. Calculate User Stats
   const collectedNormal = userItems.filter(i => i.players?.rarity === 'Normal').length;
   const collectedHero = userItems.filter(i => i.players?.rarity === 'Hero').length;
   const collectedFabled = userItems.filter(i => i.players?.rarity === 'Fabled').length;
@@ -88,10 +80,8 @@ export default async function CollectionPage() {
             <p className="text-slate-400">Track your progress towards 100% completion.</p>
         </div>
 
-        {/* STATS CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            {/* Normal Card */}
             <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-blue-400">Normal Players</h3>
@@ -101,7 +91,6 @@ export default async function CollectionPage() {
             <p className="mt-2 text-xs text-slate-500 text-right">{collectedNormal} / {totalNormal}</p>
             </div>
 
-            {/* Hero Card */}
             <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-amber-400">Heroes</h3>
@@ -111,7 +100,6 @@ export default async function CollectionPage() {
             <p className="mt-2 text-xs text-slate-500 text-right">{collectedHero} / {totalHero}</p>
             </div>
 
-            {/* Fabled Card */}
             <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-purple-400">Fabled</h3>
@@ -122,7 +110,6 @@ export default async function CollectionPage() {
             </div>
         </div>
 
-        {/* GALLERY */}
         <div className="border border-slate-800 rounded-xl p-6 bg-slate-950">
             <h2 className="text-xl font-bold text-white mb-6">Collected Items ({userItems.length})</h2>
             <ScrollArea className="h-[500px]">
