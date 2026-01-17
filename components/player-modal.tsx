@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import { Player } from "@/types";
 import {
   Dialog,
@@ -17,40 +18,75 @@ interface PlayerModalProps {
   onClose: () => void;
 }
 
+const getElementIcon = (element: string) => {
+  switch (element?.toLowerCase()) {
+    case 'fire': return '/elements/fire.png';
+    case 'wind': return '/elements/wind.png';
+    case 'forest': return '/elements/forest.png';
+    case 'mountain': return '/elements/mountain.png';
+    default: return '/elements/void.png';
+  }
+};
+
+const getPositionColor = (pos: string) => {
+  switch (pos?.toUpperCase()) {
+    case 'FW': return 'text-red-500';
+    case 'MF': return 'text-orange-500';
+    case 'DF': return 'text-blue-500';
+    case 'GK': return 'text-white-500';
+    default: return 'text-slate-400';
+  }
+};
+
 export function PlayerModal({ player, isOpen, onClose }: PlayerModalProps) {
   if (!player) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-950 border-slate-800 text-slate-100 sm:max-w-106.25">
-        <DialogHeader className="flex flex-row items-center gap-4 border-b border-slate-800 pb-4">
-          <Avatar className="h-16 w-16 border-2 border-slate-700">
-             <AvatarImage src={player.image_url || ''} />
-             <AvatarFallback className="text-xl bg-slate-800">
+      <DialogContent className="bg-slate-950 border-slate-800 text-slate-100 sm:max-w-2xl p-0 overflow-hidden">
+        <DialogHeader className="flex flex-row items-center gap-6 p-6 pb-2 bg-slate-900/50">
+          <Avatar className="h-24 w-24 border-2 border-slate-700 bg-slate-800 shadow-xl">
+              <AvatarImage src={player.image_url || ''} className="object-cover" />
+              <AvatarFallback className="text-3xl bg-slate-800 text-slate-500">
                 {player.name_en.substring(0, 2).toUpperCase()}
-             </AvatarFallback>
+              </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col gap-1">
-            <DialogTitle className="text-xl font-bold">{player.name_en}</DialogTitle>
-            <p className="text-sm text-slate-400">{player.name_jp}</p>
-            <div className="flex gap-2 mt-1">
-                <Badge variant="outline" className="text-xs">{player.role}</Badge>
-                <Badge variant="outline" className="text-xs">{player.element}</Badge>
+          
+          <div className="flex flex-col gap-2 w-full">
+            <div>
+                <DialogTitle className="text-3xl font-black tracking-tight">{player.name_en}</DialogTitle>
+                <p className="text-lg text-slate-500 font-medium">{player.name_jp || player.name_en}</p>
+            </div>
+            
+            <div className="flex items-center gap-3 mt-1">
+                <span className={`text-2xl font-black italic ${getPositionColor(player.position)}`}>
+                    {player.position}
+                </span>
+
+                <div className="bg-slate-800 p-1 rounded-md border border-slate-700">
+                    <Image 
+                        src={getElementIcon(player.element)} 
+                        alt={player.element} 
+                        width={24} 
+                        height={24}
+                    />
+                </div>
+
+                <span className="text-slate-500 font-mono text-sm">
+                    #{player.id}
+                </span>
+
+                {player.playstyle && (
+                    <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wider">
+                        {player.playstyle}
+                    </Badge>
+                )}
             </div>
           </div>
         </DialogHeader>
 
-        <PlayerRadar player={player} />
-
-        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800 mt-2">
-            <div className="flex flex-col items-center p-2 bg-slate-900 rounded">
-                <span className="text-xs text-slate-500 uppercase">Total Stats</span>
-                <span className="text-xl font-bold text-amber-500">{player.stats_base.total_stats}</span>
-            </div>
-             <div className="flex flex-col items-center p-2 bg-slate-900 rounded">
-                <span className="text-xs text-slate-500 uppercase">Position</span>
-                <span className="text-lg font-bold">{player.position || '-'}</span>
-            </div>
+        <div className="p-6 pt-0 bg-slate-950">
+           <PlayerRadar player={player} />
         </div>
       </DialogContent>
     </Dialog>
