@@ -32,31 +32,40 @@ interface CustomTickProps {
   };
   x?: string | number;
   y?: string | number;
+  cx?: string | number;
+  cy?: string | number;
   statValues: Record<string, number>;
 }
-
-function CustomTick({ payload, x, y, statValues }: CustomTickProps) {
+function CustomTick({ payload, x, y, cx, cy, statValues }: CustomTickProps) {
     const statName = payload?.value as keyof typeof STAT_CONFIG | undefined;
     if (!statName) return null;
 
     const config = STAT_CONFIG[statName];
     const value = statValues[statName] || 0;
 
-    const xVal = Number(x) || 0;
-    const yVal = Number(y) || 0;
+    const _x = Number(x) || 0;
+    const _y = Number(y) || 0;
+    const _cx = Number(cx) || 0;
+    const _cy = Number(cy) || 0;
+
+    const angle = Math.atan2(_y - _cy, _x - _cx);
+    const offset = 20; 
+    
+    const finalX = _x + Math.cos(angle) * offset;
+    const finalY = _y + Math.sin(angle) * offset;
 
     return (
-      <g transform={`translate(${xVal},${yVal})`}>
-        <text x={0} y={0} dy={-20} textAnchor="middle" fill="white" className="text-2xl font-black" style={{ fontSize: '24px', fontWeight: 900 }}>
+      <g transform={`translate(${finalX},${finalY})`}>
+        <text x={0} y={0} dy={-25} textAnchor="middle" fill="white" className="text-2xl font-black" style={{ fontSize: '24px', fontWeight: 900 }}>
             {value}
         </text>
         
-        <text x={0} y={0} dy={0} textAnchor="middle" fill="#94a3b8" className="text-xs uppercase font-bold tracking-wider" style={{ fontSize: '10px' }}>
+        <text x={0} y={0} dy={-5} textAnchor="middle" fill="#94a3b8" className="text-xs uppercase font-bold tracking-wider" style={{ fontSize: '10px' }}>
             {statName}
         </text>
 
-        <g transform="translate(0, 10)">
-            <foreignObject x="-40" y="0" width="80" height="20">
+        <g transform="translate(0, 8)">
+            <foreignObject x="-40" y="0" width="80" height="24">
                 <div className="flex justify-center gap-1 w-full h-full">
                     {config?.positions.map((pos: string) => {
                         const badge = POS_BADGES[pos as keyof typeof POS_BADGES];
@@ -64,7 +73,7 @@ function CustomTick({ payload, x, y, statValues }: CustomTickProps) {
                             <span 
                                 key={pos} 
                                 style={{ backgroundColor: badge.color }} 
-                                className="text-[9px] text-black font-bold px-1 rounded-[2px]"
+                                className="text-[9px] text-black font-bold px-1.5 py-0.5 rounded-[2px]"
                             >
                                 {badge.label}
                             </span>
@@ -79,13 +88,13 @@ function CustomTick({ payload, x, y, statValues }: CustomTickProps) {
 
 export function PlayerRadar({ player }: { player: Player }) {
   const data = [
-    { subject: "Agility", A: player.stats_base.agility, fullMark: 100 },
-    { subject: "Intelligence", A: player.stats_base.intelligence, fullMark: 100 },
-    { subject: "Technique", A: player.stats_base.technique, fullMark: 100 },
-    { subject: "Kick", A: player.stats_base.kick, fullMark: 100 },
-    { subject: "Control", A: player.stats_base.control, fullMark: 100 },
-    { subject: "Pressure", A: player.stats_base.pressure, fullMark: 100 },
-    { subject: "Physical", A: player.stats_base.physical, fullMark: 100 },
+    { subject: "Agility", A: player.stats_base.agility, fullMark: 111 },
+    { subject: "Intelligence", A: player.stats_base.intelligence, fullMark: 121 },
+    { subject: "Technique", A: player.stats_base.technique, fullMark: 116 },
+    { subject: "Kick", A: player.stats_base.kick, fullMark: 121 },
+    { subject: "Control", A: player.stats_base.control, fullMark: 115 },
+    { subject: "Pressure", A: player.stats_base.pressure, fullMark: 105 },
+    { subject: "Physical", A: player.stats_base.physical, fullMark: 109 },
   ];
 
   const statValues = {
@@ -99,9 +108,9 @@ export function PlayerRadar({ player }: { player: Player }) {
   };
 
   return (
-    <div className="h-112.5 w-full mt-4 select-none">
+    <div className="h-[450px] w-full mt-4 select-none">
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
+        <RadarChart cx="50%" cy="50%" outerRadius="55%" data={data}>
           <PolarGrid stroke="#1e293b" strokeWidth={1} />
           <PolarAngleAxis 
             dataKey="subject" 
@@ -115,6 +124,7 @@ export function PlayerRadar({ player }: { player: Player }) {
             fill="#ef4444"
             fillOpacity={0.25}
             isAnimationActive={false}
+            activeDot={false}
           />
         </RadarChart>
       </ResponsiveContainer>
