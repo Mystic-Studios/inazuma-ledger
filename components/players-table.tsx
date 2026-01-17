@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus} from "lucide-react";
+import { Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlayerModal } from "./player-modal";
 
@@ -49,11 +49,12 @@ export function PlayersTable({ players }: PlayersTableProps) {
         <Table>
           <TableHeader className="bg-slate-900 hover:bg-slate-900">
             <TableRow className="border-slate-800">
-              <TableHead className="w-12.5"></TableHead>
-              <TableHead className="w-12.5 text-slate-400">ID</TableHead>
+              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-12 text-slate-400">ID</TableHead>
               <TableHead className="text-slate-400">PLAYER</TableHead>
               <TableHead className="text-slate-400">POSITION</TableHead>
               <TableHead className="text-slate-400">ELEMENT</TableHead>
+              <TableHead className="text-slate-400">PLAYSTYLE</TableHead>
               <TableHead className="text-right text-blue-400 font-bold">KICK</TableHead>
               <TableHead className="text-right text-blue-400 font-bold">CTRL</TableHead>
               <TableHead className="text-right text-blue-400 font-bold">TECH</TableHead>
@@ -86,8 +87,14 @@ export function PlayersTable({ players }: PlayersTableProps) {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9 border border-slate-700 bg-slate-800">
-                      <AvatarImage src={player.image_url || ''} />
-                      <AvatarFallback className="text-xs text-slate-500">
+                      {player.image_url && (
+                        <AvatarImage 
+                          src={player.image_url} 
+                          alt={player.name_en}
+                          className="object-cover" 
+                        />
+                      )}
+                      <AvatarFallback className="text-xs text-slate-400 bg-slate-900 font-medium">
                           {player.name_en.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -106,12 +113,16 @@ export function PlayersTable({ players }: PlayersTableProps) {
                   <div className="flex items-center" title={player.element}>
                     <Image 
                       src={getElementImage(player.element)} 
-                      alt={player.element}
+                      alt={player.element || 'Element'} 
                       width={24} 
                       height={24} 
                       className="opacity-90"
                     />
                   </div>
+                </TableCell>
+
+                <TableCell className="text-slate-400 text-sm">
+                  {player.playstyle || '-'}
                 </TableCell>
 
                 <TableCell className="text-right font-mono text-slate-300">{player.stats_base.kick}</TableCell>
