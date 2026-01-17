@@ -19,15 +19,17 @@ export function SearchControls() {
     replace(`${pathname}?${params.toString()}`);
   }, 300);
 
-  const handleRoleClick = (role: string | null) => {
+  const handlePositionClick = (pos: string | null) => {
     const params = new URLSearchParams(searchParams);
     params.set('page', '1');
-    if (role) params.set('role', role);
-    else params.delete('role');
+    
+    if (pos) params.set('position', pos);
+    else params.delete('position');
+    
     replace(`${pathname}?${params.toString()}`);
   };
 
-  const currentRole = searchParams.get('role');
+  const currentPos = searchParams.get('position');
 
   return (
     <div className="space-y-4 mb-6">
@@ -43,19 +45,22 @@ export function SearchControls() {
             </div>
 
             <div className="flex gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
-                {['All', 'GK', 'DF', 'MF', 'FW'].map((role) => {
-                    const isActive = role === 'All' ? !currentRole : currentRole === role;
+                {['All', 'GK', 'DF', 'MF', 'FW'].map((label) => {
+                    const isSelected = label === 'All' 
+                        ? !currentPos 
+                        : currentPos === label;
+
                     return (
                         <button
-                            key={role}
-                            onClick={() => handleRoleClick(role === 'All' ? null : role)}
-                            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                                isActive 
-                                ? 'bg-slate-800 text-white shadow-sm' 
-                                : 'text-slate-500 hover:text-slate-300'
+                            key={label}
+                            onClick={() => handlePositionClick(label === 'All' ? null : label)}
+                            className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                                isSelected 
+                                ? 'bg-slate-800 text-white shadow-sm border border-slate-700' 
+                                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
                             }`}
                         >
-                            {role}
+                            {label}
                         </button>
                     )
                 })}
