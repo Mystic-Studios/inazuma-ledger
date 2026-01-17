@@ -24,22 +24,22 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
-      <div className="container flex h-16 items-center">
+      <div className="w-full px-4 md:px-8 flex h-16 items-center justify-between">
         
-        <div className="flex-none">
+        <div className="flex-none min-w-fit mr-4">
             <Link href="/" className="flex items-center gap-2 group">
                 <div className="flex flex-col leading-none">
                     <span className="text-xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors">
-                        INAZUMA
+                        INAZUMA LEDGER
                     </span>
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-400">
-                        Victory Road
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-400">
+                        Victory Road Database
                     </span>
                 </div>
             </Link>
         </div>
 
-        <nav className="flex-1 flex justify-center items-center px-4 overflow-x-auto no-scrollbar">
+        <nav className="flex-1 flex justify-center items-center overflow-x-auto no-scrollbar mx-4">
             <div className="flex items-center space-x-1">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
@@ -61,7 +61,7 @@ export function Navbar() {
             </div>
         </nav>
 
-        <div className="flex-none flex items-center gap-2">
+        <div className="flex-none min-w-fit ml-4 flex justify-end">
           <Button 
             className="bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold rounded-full px-5 h-9 text-xs transition-transform active:scale-95"
           >
