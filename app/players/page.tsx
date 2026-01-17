@@ -13,6 +13,11 @@ export default async function PlayersPage(props: {
 
   const query = (searchParams?.query as string) || '';
   const position = (searchParams?.position as string) || '';
+  const element = (searchParams?.element as string) || '';
+  const gender = (searchParams?.gender as string) || '';
+  const playstyle = (searchParams?.playstyle as string) || '';
+  const role = (searchParams?.role as string) || '';
+
   const currentPage = Number(searchParams?.page) || 1;
   const ITEMS_PER_PAGE = 50; 
 
@@ -24,7 +29,11 @@ export default async function PlayersPage(props: {
     .select('*', { count: 'exact' });
 
   if (query) supabaseQuery = supabaseQuery.ilike('name_en', `%${query}%`);
-  if (position) supabaseQuery = supabaseQuery.ilike('position', `%${position}%`);
+  if (position) supabaseQuery = supabaseQuery.ilike('position', `${position}`);
+  if (element) supabaseQuery = supabaseQuery.ilike('element', `${element}`);
+  if (gender) supabaseQuery = supabaseQuery.ilike('gender', `${gender}`);
+  if (playstyle) supabaseQuery = supabaseQuery.ilike('playstyle', `${playstyle}`);
+  if (role) supabaseQuery = supabaseQuery.ilike('role', role);
 
   const { data: players, count, error } = await supabaseQuery
     .order('id', { ascending: true }) 

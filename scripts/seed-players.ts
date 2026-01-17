@@ -95,7 +95,7 @@ async function importPlayers() {
         id: Number(getVal('ID')),
         name_en: getString('Name(Localised)'),
         name_jp: getString('Name(Romaji)'),
-        gender: getString('Gender'),
+        gender: cleanText(getString('Gender')),
 
         role: cleanText(getString('Role')),
         position: getString('Position'),
