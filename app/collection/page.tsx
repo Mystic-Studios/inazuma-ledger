@@ -1,3 +1,142 @@
-export default function CollectionPage() {
-  return <div className="p-10 text-center text-xl">Collection Page (Coming Soon)</div>;
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { Progress } from "@/components/ui/progress"; 
+import Image from "next/image";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Define the shape of the data returning from the join query
+interface CollectionItem {
+  player_id: number;
+  players: {
+    id: number;
+    name_en: string;
+    rarity: string;
+    element: string;
+    image_url: string | null;
+  } | null; // Join might return null if something is wrong, though unlikely with FKs
+}
+
+const getPercentage = (count: number, total: number) => {
+  if (total === 0) return 0;
+  return Math.round((count / total) * 100);
+};
+
+export default async function CollectionPage() {
+  const supabase = await createClient();
+
+  // 1. Auth Check
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/"); 
+  }
+
+  // 2. Fetch User's Collection
+  // We explicitly type the response to avoid "any" errors
+  const { data } = await supabase
+    .from('user_collections')
+    .select(`
+      player_id,
+      players (
+        id,
+        name_en,
+        rarity,
+        element,
+        image_url
+      )
+    `)
+    .eq('user_id', user.id);
+
+  // Cast the data to our interface
+  const userItems = (data as unknown as CollectionItem[]) || [];
+
+  // 3. Fetch Total Counts
+  const { count: totalNormal } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Normal');
+  const { count: totalHero } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Hero');
+  const { count: totalFabled } = await supabase.from('players').select('*', { count: 'exact', head: true }).eq('rarity', 'Fabled');
+
+  // 4. Calculate User Stats (Now using proper types)
+  const collectedNormal = userItems.filter(i => i.players?.rarity === 'Normal').length;
+  const collectedHero = userItems.filter(i => i.players?.rarity === 'Hero').length;
+  const collectedFabled = userItems.filter(i => i.players?.rarity === 'Fabled').length;
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-200">
+      <div className="container mx-auto py-10 space-y-8">
+        
+        <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-black text-white tracking-tighter uppercase">My Collection</h1>
+            <p className="text-slate-400">Track your progress towards 100% completion.</p>
+        </div>
+
+        {/* STATS CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Normal Card */}
+            <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-blue-400">Normal Players</h3>
+                <span className="text-2xl font-black text-white">{getPercentage(collectedNormal, totalNormal || 1)}%</span>
+            </div>
+            <Progress value={getPercentage(collectedNormal, totalNormal || 1)} className="h-2 bg-slate-800" />
+            <p className="mt-2 text-xs text-slate-500 text-right">{collectedNormal} / {totalNormal}</p>
+            </div>
+
+            {/* Hero Card */}
+            <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-amber-400">Heroes</h3>
+                <span className="text-2xl font-black text-white">{getPercentage(collectedHero, totalHero || 1)}%</span>
+            </div>
+            <Progress value={getPercentage(collectedHero, totalHero || 1)} className="h-2 bg-slate-800" indicatorClassName="bg-amber-400" />
+            <p className="mt-2 text-xs text-slate-500 text-right">{collectedHero} / {totalHero}</p>
+            </div>
+
+            {/* Fabled Card */}
+            <div className="p-6 rounded-xl border border-slate-800 bg-slate-900/50">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-purple-400">Fabled</h3>
+                <span className="text-2xl font-black text-white">{getPercentage(collectedFabled, totalFabled || 1)}%</span>
+            </div>
+            <Progress value={getPercentage(collectedFabled, totalFabled || 1)} className="h-2 bg-slate-800" indicatorClassName="bg-purple-400" />
+            <p className="mt-2 text-xs text-slate-500 text-right">{collectedFabled} / {totalFabled}</p>
+            </div>
+        </div>
+
+        {/* GALLERY */}
+        <div className="border border-slate-800 rounded-xl p-6 bg-slate-950">
+            <h2 className="text-xl font-bold text-white mb-6">Collected Items ({userItems.length})</h2>
+            <ScrollArea className="h-[500px]">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pr-4">
+                {userItems.map((item) => (
+                    item.players && (
+                        <div key={item.player_id} className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex flex-col items-center gap-3 hover:bg-slate-800 transition-colors">
+                            <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-700 bg-slate-950">
+                                {item.players.image_url ? (
+                                    <Image 
+                                        src={item.players.image_url} 
+                                        alt={item.players.name_en} 
+                                        fill
+                                        className="object-cover" 
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-500">No Img</div>
+                                )}
+                            </div>
+                            <div className="text-center w-full">
+                                <p className="text-xs font-bold text-slate-200 truncate w-full" title={item.players.name_en}>
+                                    {item.players.name_en}
+                                </p>
+                                <p className="text-[10px] text-slate-500 uppercase tracking-wide">
+                                    {item.players.rarity}
+                                </p>
+                            </div>
+                        </div>
+                    )
+                ))}
+                </div>
+            </ScrollArea>
+        </div>
+      </div>
+    </div>
+  );
 }

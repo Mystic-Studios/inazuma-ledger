@@ -1,8 +1,8 @@
-import { supabase } from "@/lib/supabaseClient";
 import { Player } from "@/types";
 import { SearchControls } from "@/components/ui/search-controls";
 import { PlayersTable } from "@/components/players-table";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +10,7 @@ export default async function PlayersPage(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const searchParams = await props.searchParams;
+  const supabase = await createClient();
 
   const query = (searchParams?.query as string) || '';
   const position = (searchParams?.position as string) || '';
@@ -43,6 +44,20 @@ export default async function PlayersPage(props: {
     return <div className="p-10 text-red-500">Error: {error.message}</div>;
   }
 
+  const { data: { user } } = await supabase.auth.getUser();
+  let collectedIds: number[] = [];
+
+  if (user) {
+    const { data: collection } = await supabase
+      .from('user_collections')
+      .select('player_id')
+      .eq('user_id', user.id);
+    
+    if (collection) {
+      collectedIds = collection.map((c) => c.player_id);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200">
       <div className="container mx-auto py-8">
@@ -55,7 +70,10 @@ export default async function PlayersPage(props: {
 
         <SearchControls />
 
-        <PlayersTable players={players as Player[]} />
+        <PlayersTable 
+            players={players as Player[]} 
+            initialCollection={collectedIds} 
+        />
 
         {count && (
           <PaginationControls 

@@ -15,9 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlayerModal } from "./player-modal";
+import { toggleCollection } from "@/actions/collection";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface PlayersTableProps {
   players: Player[];
+  initialCollection?: number[];
 }
 
 const getElementImage = (element: string) => {
@@ -39,9 +43,28 @@ const getPositionColor = (position: string) => {
     default: return 'text-gray-400';
   }
 };
-
-export function PlayersTable({ players }: PlayersTableProps) {
+export function PlayersTable({ players, initialCollection }: PlayersTableProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  
+  const [collectedIds, setCollectedIds] = useState<Set<number>>(new Set(initialCollection));
+
+  const handleToggle = async (player: Player, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const isCollected = collectedIds.has(player.id);
+    const newSet = new Set(collectedIds);
+    if (isCollected) newSet.delete(player.id);
+    else newSet.add(player.id);
+    setCollectedIds(newSet);
+
+    try {
+      await toggleCollection(player.id, player.rarity);
+      toast.success(isCollected ? "Removed from collection" : "Added to collection");
+    } catch (error) {
+      setCollectedIds(new Set(initialCollection));
+      toast.error("Failed to update collection");
+    }
+  };
 
   return (
     <>
@@ -66,75 +89,95 @@ export function PlayersTable({ players }: PlayersTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {players.map((player) => (
-              <TableRow 
-                key={player.id} 
-                className="border-slate-800 hover:bg-slate-900/50 group cursor-pointer"
-                onClick={() => setSelectedPlayer(player)}
-              >
-                <TableCell onClick={(e) => e.stopPropagation()}> 
-                  <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-cyan-400 hover:bg-cyan-400/10">
-                          <Plus className="h-4 w-4" />
-                      </Button>
-                  </div>
-                </TableCell>
-
-                <TableCell className="font-mono text-slate-500">
-                  {player.id}
-                </TableCell>
-
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9 border border-slate-700 bg-slate-800">
-                      {player.image_url && (
-                        <AvatarImage 
-                          src={player.image_url} 
-                          alt={player.name_en}
-                          className="object-cover" 
-                        />
-                      )}
-                      <AvatarFallback className="text-xs text-slate-400 bg-slate-900 font-medium">
-                          {player.name_en.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-medium text-slate-200">{player.name_en}</span>
-                      <span className="text-xs text-slate-500">{player.name_jp || '-'}</span>
+            {players.map((player) => {
+              const isCollected = collectedIds.has(player.id);
+              return (
+                <TableRow 
+                  key={player.id} 
+                  className={cn(
+                    "border-slate-800 cursor-pointer transition-colors",
+                    isCollected 
+                        ? "bg-emerald-950/40 hover:bg-emerald-950/60" 
+                        : "hover:bg-slate-900/50"
+                  )}
+                  onClick={() => setSelectedPlayer(player)}
+                >
+                  <TableCell> 
+                    <div className="flex gap-1">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={(e) => handleToggle(player, e)}
+                            className={cn(
+                                "h-8 w-8 transition-all active:scale-90",
+                                isCollected 
+                                    ? "text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10" 
+                                    : "text-slate-600 hover:text-slate-400 hover:bg-slate-800"
+                            )}
+                        >
+                            <Plus className={cn("h-4 w-4", isCollected && "fill-current")} />
+                        </Button>
                     </div>
-                  </div>
-                </TableCell>
+                  </TableCell>
 
-                <TableCell className={`font-black italic ${getPositionColor(player.position)}`}>
-                  {player.position}
-                </TableCell>
+                  <TableCell className="font-mono text-slate-500">
+                    {player.id}
+                  </TableCell>
 
-                <TableCell>
-                  <div className="flex items-center" title={player.element}>
-                    <Image 
-                      src={getElementImage(player.element)} 
-                      alt={player.element || 'Element'} 
-                      width={24} 
-                      height={24} 
-                      className="opacity-90"
-                    />
-                  </div>
-                </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9 border border-slate-700 bg-slate-800">
+                        {player.image_url && (
+                          <AvatarImage 
+                            src={player.image_url} 
+                            alt={player.name_en}
+                            className="object-cover" 
+                          />
+                        )}
+                        <AvatarFallback className="text-xs text-slate-400 bg-slate-900 font-medium">
+                            {player.name_en.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className={cn("font-medium", isCollected ? "text-emerald-100" : "text-slate-200")}>
+                            {player.name_en}
+                        </span>
+                        <span className="text-xs text-slate-500">{player.name_jp || '-'}</span>
+                      </div>
+                    </div>
+                  </TableCell>
 
-                <TableCell className="text-slate-400 text-sm">
-                  {player.playstyle || '-'}
-                </TableCell>
+                  <TableCell className={`font-black italic ${getPositionColor(player.position)}`}>
+                    {player.position}
+                  </TableCell>
 
-                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.kick}</TableCell>
-                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.control}</TableCell>
-                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.technique}</TableCell>
-                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.pressure}</TableCell>
-                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.physical}</TableCell>
-                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.agility}</TableCell>
-                <TableCell className="text-right font-mono text-slate-300">{player.stats_base.intelligence}</TableCell>
-                <TableCell className="text-right font-mono font-bold text-amber-400">{player.stats_base.total_stats}</TableCell>
-              </TableRow>
-            ))}
+                  <TableCell>
+                    <div className="flex items-center" title={player.element}>
+                      <Image 
+                        src={getElementImage(player.element)} 
+                        alt={player.element || 'Element'} 
+                        width={24} 
+                        height={24} 
+                        className="opacity-90"
+                      />
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-slate-400 text-sm">
+                    {player.playstyle || '-'}
+                  </TableCell>
+
+                  <TableCell className="text-right font-mono text-slate-300">{player.stats_base.kick}</TableCell>
+                  <TableCell className="text-right font-mono text-slate-300">{player.stats_base.control}</TableCell>
+                  <TableCell className="text-right font-mono text-slate-300">{player.stats_base.technique}</TableCell>
+                  <TableCell className="text-right font-mono text-slate-300">{player.stats_base.pressure}</TableCell>
+                  <TableCell className="text-right font-mono text-slate-300">{player.stats_base.physical}</TableCell>
+                  <TableCell className="text-right font-mono text-slate-300">{player.stats_base.agility}</TableCell>
+                  <TableCell className="text-right font-mono text-slate-300">{player.stats_base.intelligence}</TableCell>
+                  <TableCell className="text-right font-mono font-bold text-amber-400">{player.stats_base.total_stats}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

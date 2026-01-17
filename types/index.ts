@@ -13,6 +13,7 @@ export interface Player {
   id: number;
   name_en: string;
   name_jp: string | null;
+  rarity: string;
   gender: string | null;
   role: string;
   position: string;
