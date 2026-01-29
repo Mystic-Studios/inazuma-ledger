@@ -56,7 +56,7 @@ const getColumnIndex = (headers: string[], possibleNames: string[]) => {
 
 async function importPlayers() {
   const allPlayers = [];
-  let nextAutoId = 5815;
+  let nextAutoId = 5854;
   const imageMap = new Map<string, string>();
 
   console.log('Starting Import Script...');
